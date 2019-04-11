@@ -80,14 +80,19 @@ TraktorS2MK3.registerInputPackets = function() {
   // "[Channel1]" and "[Channel2]" refer to the left deck or right deck, and may be Channel1 or 3 depending
   // on the deck switch state.  These are keywords in the HID library.
 
-  MessageShort.addControl("[Channel1]", "!shift", 0x0B, "B", 0x08);
+  MessageShort.addControl("[Channel1]", "!shift", 1, "B", 0x20);
   MessageShort.addControl("[Channel1]", "!sync_enabled", 0x0B, "B", 0x04);
-  MessageShort.addControl("[Channel1]", "!cue_default", 0x02, "B", 0x04);
-  MessageShort.addControl("[Channel1]", "!play", 0x02, "B", 0x08);
-  MessageShort.addControl("[Channel1]", "!hotcue1", 0x0B, "B", 0x80);
-  MessageShort.addControl("[Channel1]", "!hotcue2", 0x0B, "B", 0x40);
-  MessageShort.addControl("[Channel1]", "!hotcue3", 0x0B, "B", 0x20);
-  MessageShort.addControl("[Channel1]", "!hotcue4", 0x0B, "B", 0x10);
+  MessageShort.addControl("[Channel1]", "!cue_default", 2, "B", 0x04);
+  MessageShort.addControl("[Channel1]", "!play", 2, "B", 8);
+  MessageShort.addControl("[Channel1]", "!hotcue1", 2, "B", 0x10);
+  MessageShort.addControl("[Channel1]", "!hotcue2", 2, "B", 0x20);
+  MessageShort.addControl("[Channel1]", "!hotcue3", 2, "B", 0x40);
+  MessageShort.addControl("[Channel1]", "!hotcue4", 2, "B", 0x80);
+  MessageShort.addControl("[Channel1]", "!hotcue5", 3, "B", 0x01);
+  MessageShort.addControl("[Channel1]", "!hotcue6", 3, "B", 0x02);
+  MessageShort.addControl("[Channel1]", "!hotcue7", 3, "B", 0x04);
+  MessageShort.addControl("[Channel1]", "!hotcue8", 3, "B", 0x08);
+
   MessageShort.addControl("[Channel1]", "loop_out", 0x0C, "B", 0x80);
   MessageShort.addControl("[Channel1]", "loop_in", 0x0C, "B", 0x40);
   //MessageShort.addControl("[Channel1]", "slip_enabled", 0x0E, "B", 0x02);
@@ -102,12 +107,12 @@ TraktorS2MK3.registerInputPackets = function() {
   //MessageShort.addControl("[Channel1]", "!FX3", 0x0E, "B", 0x40);
   //MessageShort.addControl("[Channel1]", "!FX4", 0x0E, "B", 0x20);
   //MessageShort.addControl("[EffectRack1_EffectUnit1]", "next_chain", 0x0E, "B", 0x10);
-  MessageShort.addControl("[EffectRack1_EffectUnit1_Effect1]", "enabled", 0x0E, "B", 0x80);
-  MessageShort.addControl("[EffectRack1_EffectUnit1_Effect2]", "enabled", 0x0E, "B", 0x40);
-  MessageShort.addControl("[EffectRack1_EffectUnit1_Effect3]", "enabled", 0x0E, "B", 0x20);
-  MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect1]", "enabled", this.effectEnabledHandler);
-  MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect2]", "enabled", this.effectEnabledHandler);
-  MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect3]", "enabled", this.effectEnabledHandler);
+  // MessageShort.addControl("[EffectRack1_EffectUnit1_Effect1]", "enabled", 0x0E, "B", 0x80);
+  // MessageShort.addControl("[EffectRack1_EffectUnit1_Effect2]", "enabled", 0x0E, "B", 0x40);
+  // MessageShort.addControl("[EffectRack1_EffectUnit1_Effect3]", "enabled", 0x0E, "B", 0x20);
+  // MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect1]", "enabled", this.effectEnabledHandler);
+  // MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect2]", "enabled", this.effectEnabledHandler);
+  // MessageShort.setCallback("[EffectRack1_EffectUnit1_Effect3]", "enabled", this.effectEnabledHandler);
 
   // MessageShort.addControl("[Channel2]", "!shift", 0x09, "B", 0x08);
   // MessageShort.addControl("[Channel2]", "!sync_enabled", 0x09, "B", 0x04);
@@ -138,20 +143,20 @@ TraktorS2MK3.registerInputPackets = function() {
   // MessageShort.setCallback("[EffectRack1_EffectUnit2_Effect3]", "enabled", this.effectEnabledHandler);
   // //MessageShort.addControl("[EffectRack1_EffectUnit2]", "next_chain", 0xD, "B", 0x04);
 
-  MessageShort.addControl("[Channel1]", "pfl", 0x0C, "B", 0x10);
-  MessageShort.addControl("[EffectRack1_EffectUnit1]","group_[Channel1]_enable", 0x0E, "B", 0x08);
-  MessageShort.addControl("[EffectRack1_EffectUnit2]","group_[Channel1]_enable", 0x0E, "B", 0x04);
-  MessageShort.addControl("[Channel1]", "pregain_set_default", 0x0D, "B", 0x40);
+  // MessageShort.addControl("[Channel1]", "pfl", 0x0C, "B", 0x10);
+  // MessageShort.addControl("[EffectRack1_EffectUnit1]","group_[Channel1]_enable", 0x0E, "B", 0x08);
+  // MessageShort.addControl("[EffectRack1_EffectUnit2]","group_[Channel1]_enable", 0x0E, "B", 0x04);
+  // MessageShort.addControl("[Channel1]", "pregain_set_default", 0x0D, "B", 0x40);
 
-  MessageShort.addControl("[Channel2]", "pfl", 0x0A, "B", 0x10);
-  MessageShort.addControl("[EffectRack1_EffectUnit1]","group_[Channel2]_enable", 0x0E, "B", 0x02);
-  MessageShort.addControl("[EffectRack1_EffectUnit2]","group_[Channel2]_enable", 0x0E, "B", 0x01);
-  MessageShort.addControl("[Channel2]", "pregain_set_default", 0x0D, "B", 0x80);
+  // MessageShort.addControl("[Channel2]", "pfl", 0x0A, "B", 0x10);
+  // MessageShort.addControl("[EffectRack1_EffectUnit1]","group_[Channel2]_enable", 0x0E, "B", 0x02);
+  // MessageShort.addControl("[EffectRack1_EffectUnit2]","group_[Channel2]_enable", 0x0E, "B", 0x01);
+  // MessageShort.addControl("[Channel2]", "pregain_set_default", 0x0D, "B", 0x80);
 
-  MessageShort.addControl("[Playlist]", "LoadSelectedIntoFirstStopped", 0x13, "B", 0x04);
-  MessageShort.addControl("[Preview[Channel1]]", "!previewdeck", 0x0F, "B", 0x01);
+  // MessageShort.addControl("[Playlist]", "LoadSelectedIntoFirstStopped", 0x13, "B", 0x04);
+  // MessageShort.addControl("[Preview[Channel1]]", "!previewdeck", 0x0F, "B", 0x01);
 
-  MessageShort.addControl("[Master]", "!quantize", 0x0A, "B", 0x08);
+  // MessageShort.addControl("[Master]", "!quantize", 0x0A, "B", 0x08);
 
   MessageShort.setCallback("[Channel1]", "!shift", this.shiftHandler);
   MessageShort.setCallback("[Channel2]", "!shift", this.shiftHandler);
@@ -163,10 +168,18 @@ TraktorS2MK3.registerInputPackets = function() {
   MessageShort.setCallback("[Channel1]", "!hotcue2", this.hotcueHandler);
   MessageShort.setCallback("[Channel1]", "!hotcue3", this.hotcueHandler);
   MessageShort.setCallback("[Channel1]", "!hotcue4", this.hotcueHandler);
+  MessageShort.setCallback("[Channel1]", "!hotcue5", this.hotcueHandler);
+  MessageShort.setCallback("[Channel1]", "!hotcue6", this.hotcueHandler);
+  MessageShort.setCallback("[Channel1]", "!hotcue7", this.hotcueHandler);
+  MessageShort.setCallback("[Channel1]", "!hotcue8", this.hotcueHandler);
   MessageShort.setCallback("[Channel2]", "!hotcue1", this.hotcueHandler);
   MessageShort.setCallback("[Channel2]", "!hotcue2", this.hotcueHandler);
   MessageShort.setCallback("[Channel2]", "!hotcue3", this.hotcueHandler);
   MessageShort.setCallback("[Channel2]", "!hotcue4", this.hotcueHandler);
+  MessageShort.setCallback("[Channel2]", "!hotcue5", this.hotcueHandler);
+  MessageShort.setCallback("[Channel2]", "!hotcue6", this.hotcueHandler);
+  MessageShort.setCallback("[Channel2]", "!hotcue7", this.hotcueHandler);
+  MessageShort.setCallback("[Channel2]", "!hotcue8", this.hotcueHandler);
   MessageShort.setCallback("[Channel1]", "!load_track", this.loadTrackHandler);
   MessageShort.setCallback("[Channel2]", "!load_track", this.loadTrackHandler);
   MessageShort.setCallback("[Channel1]", "!sync_enabled", this.syncEnabledHandler);
@@ -246,7 +259,7 @@ TraktorS2MK3.registerInputPackets = function() {
 
 TraktorS2MK3.registerOutputPackets = function() {
   Output1 = new HIDPacket("output1", [0x80], 38);
-  Output2 = new HIDPacket("output2", [0x81], 33);
+  // Output2 = new HIDPacket("output2", [0x81], 33);
 
   var VuOffsets = {"[Channel1]" : 28,
                    "[Channel2]" : 34};
@@ -257,82 +270,47 @@ TraktorS2MK3.registerOutputPackets = function() {
     }
   }
 
-
   Output1.addOutput("[Channel1]", "PeakIndicator", 33, "B");
   Output1.addOutput("[Channel2]", "PeakIndicator", 39, "B");
 
-  // Output1.addOutput("[Channel1]", "loop_in", 0x21, "B");
-  // Output1.addOutput("[Channel1]", "loop_out", 0x22, "B");
-  // Output2.addOutput("[Channel2]", "loop_in", 0x23, "B");
-  // Output2.addOutput("[Channel2]", "loop_out", 0x24, "B");
-
-  // Output1.addOutput("[Channel1]", "pfl", 0x1B, "B");
-  // Output1.addOutput("[Master]", "!usblight", 0x1D, "B");
-  // Output1.addOutput("[Channel2]", "pfl", 0x1F, "B");
-
-  // Output1.addOutput("[EffectRack1_EffectUnit1]", "group_[Channel1]_enable", 0x0F, "B");
-  // Output1.addOutput("[EffectRack1_EffectUnit2]", "group_[Channel1]_enable", 0x10, "B");
-  // Output1.addOutput("[EffectRack1_EffectUnit1]", "group_[Channel2]_enable", 0x11, "B");
-  // Output1.addOutput("[EffectRack1_EffectUnit2]", "group_[Channel2]_enable", 0x12, "B");
-
-  // //
-  // //Output1.addOutput("[Master]", "!quantize", 0x31, "B");
-  // //Output1.addOutput("[InternalClock]", "sync_master", 0x30, "B");
+  Output1.addOutput("[Master]", "!quantize", 61, "B");
 
   Output1.addOutput("[Channel1]", "cue_indicator", 0x0B, "B");
   Output1.addOutput("[Channel1]", "play_indicator", 0x0C, "B");
 
+  Output1.addOutput("[Channel1]", "!shift", 6, "B");
+  Output1.addOutput("[Channel1]", "sync_enabled", 9, "B");
+  Output1.addOutput("[Channel1]", "cue_indicator", 11, "B");
+  Output1.addOutput("[Channel1]", "play_indicator", 12, "B");
+  Output1.addOutput("[Channel1]", "keylock", 10, "B");
+  Output1.addOutput("[Channel1]", "slip_enabled", 2, "B");
+
+  Output1.addOutput("[Channel1]", "hotcue_1_enabled", 13, "B");
+  Output1.addOutput("[Channel1]", "hotcue_2_enabled", 14, "B");
+  Output1.addOutput("[Channel1]", "hotcue_3_enabled", 15, "B");
+  Output1.addOutput("[Channel1]", "hotcue_4_enabled", 16, "B");
+  Output1.addOutput("[Channel1]", "hotcue_5_enabled", 17, "B");
+  Output1.addOutput("[Channel1]", "hotcue_6_enabled", 18, "B");
+  Output1.addOutput("[Channel1]", "hotcue_7_enabled", 19, "B");
+  Output1.addOutput("[Channel1]", "hotcue_7_enabled", 20, "B");
+
+  Output1.addOutput("[Channel2]", "!shift", 45, "B");
+  Output1.addOutput("[Channel2]", "sync_enabled", 48, "B");
+  Output1.addOutput("[Channel2]", "cue_indicator", 50, "B");
+  Output1.addOutput("[Channel2]", "play_indicator", 51, "B");
+  Output1.addOutput("[Channel2]", "keylock", 49, "B");
+  Output1.addOutput("[Channel2]", "slip_enabled", 41, "B");
+
+  Output1.addOutput("[Channel2]", "hotcue_1_enabled", 52, "B");
+  Output1.addOutput("[Channel2]", "hotcue_2_enabled", 53, "B");
+  Output1.addOutput("[Channel2]", "hotcue_3_enabled", 54, "B");
+  Output1.addOutput("[Channel2]", "hotcue_4_enabled", 55, "B");
+  Output1.addOutput("[Channel2]", "hotcue_5_enabled", 56, "B");
+  Output1.addOutput("[Channel2]", "hotcue_6_enabled", 57, "B");
+  Output1.addOutput("[Channel2]", "hotcue_7_enabled", 58, "B");
+  Output1.addOutput("[Channel2]", "hotcue_7_enabled", 59, "B");
+
   this.controller.registerOutputPacket(Output1);
-
-  // Output2.addOutput("[Channel1]", "!shift", 0x19, "B");
-  // Output2.addOutput("[Channel1]", "sync_enabled", 0x1A, "B");
-  // Output2.addOutput("[Channel1]", "cue_indicator", 0x1B, "B");
-  // Output2.addOutput("[Channel1]", "play_indicator", 0x0C, "B");
-  // Output2.addOutput("[Channel1]", "hotcue_1_enabled", 0x01, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_1_enabled_G", 0x02, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_1_enabled_B", 0x03, "B");
-  // Output2.addOutput("[Channel1]", "hotcue_2_enabled", 0x04, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_2_enabled_G", 0x05, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_2_enabled_B", 0x06, "B");
-  // Output2.addOutput("[Channel1]", "hotcue_3_enabled", 0x07, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_3_enabled_G", 0x08, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_3_enabled_B", 0x09, "B");
-  // Output2.addOutput("[Channel1]", "hotcue_4_enabled", 0x0A, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_4_enabled_G", 0x0B, "B");
-  // Output2.addOutput("[Channel1]", "!hotcue_4_enabled_B", 0x0C, "B");
-
-  // //Output2.addOutput("[Channel1]", "loop_out", 0x2A, "B");
-  // //Output2.addOutput("[Channel1]", "keylock", 0x2F, "B");
-  // //Output2.addOutput("[Channel1]", "slip_enabled", 0x39, "B");
-
-  // Output2.addOutput("[Channel2]", "!shift", 0x1D, "B");
-  // Output2.addOutput("[Channel2]", "sync_enabled", 0x1E, "B");
-  // Output2.addOutput("[Channel2]", "cue_indicator", 0x1F, "B");
-  // Output2.addOutput("[Channel2]", "play_indicator", 0x20, "B");
-  // Output2.addOutput("[Channel2]", "hotcue_1_enabled", 0x0D, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_1_enabled_G", 0x0E, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_1_enabled_B", 0x0F, "B");
-  // Output2.addOutput("[Channel2]", "hotcue_2_enabled", 0x10, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_2_enabled_G", 0x11, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_2_enabled_B", 0x12, "B");
-  // Output2.addOutput("[Channel2]", "hotcue_3_enabled", 0x13, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_3_enabled_G", 0x14, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_3_enabled_B", 0x15, "B");
-  // Output2.addOutput("[Channel2]", "hotcue_4_enabled", 0x16, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_4_enabled_G", 0x17, "B");
-  // Output2.addOutput("[Channel2]", "!hotcue_4_enabled_B", 0x18, "B");
-  // //Output2.addOutput("[Channel2]", "keylock", 0x35, "B");
-  // //Output2.addOutput("[Channel2]", "slip_enabled", 0x3B, "B");
-
-
-  // /*Output2.addOutput("[Channel1]", "!deck_A", 0x2E, "B");
-  // Output2.addOutput("[Channel2]", "!deck_B", 0x34, "B");
-
-  // Output2.addOutput("[Preview[Channel1]]", "play_indicator", 0x3D, "B");
-
-  // }*/
-
-  this.controller.registerOutputPacket(Output2);
 
   // Link up control objects to their outputs
   TraktorS2MK3.linkDeckOutputs("sync_enabled", TraktorS2MK3.outputCallback);
@@ -347,6 +325,10 @@ TraktorS2MK3.registerOutputPackets = function() {
   TraktorS2MK3.linkDeckOutputs("hotcue_2_enabled", TraktorS2MK3.outputCueCallback);
   TraktorS2MK3.linkDeckOutputs("hotcue_3_enabled", TraktorS2MK3.outputCueCallback);
   TraktorS2MK3.linkDeckOutputs("hotcue_4_enabled", TraktorS2MK3.outputCueCallback);
+  TraktorS2MK3.linkDeckOutputs("hotcue_5_enabled", TraktorS2MK3.outputCueCallback);
+  TraktorS2MK3.linkDeckOutputs("hotcue_6_enabled", TraktorS2MK3.outputCueCallback);
+  TraktorS2MK3.linkDeckOutputs("hotcue_7_enabled", TraktorS2MK3.outputCueCallback);
+  TraktorS2MK3.linkDeckOutputs("hotcue_8_enabled", TraktorS2MK3.outputCueCallback);
   TraktorS2MK3.linkDeckOutputs("loop_in", TraktorS2MK3.outputCallbackLoop);
   TraktorS2MK3.linkDeckOutputs("loop_out", TraktorS2MK3.outputCallbackLoop);
   TraktorS2MK3.linkDeckOutputs("keylock", TraktorS2MK3.outputCallbackDark);
@@ -497,17 +479,23 @@ TraktorS2MK3.debugLights = function() {
   //                     "7f 00 00 7f  00 7F 7F 7F  7F 7F 7f 7f  00 7F 7F 7F  \n" +
   //                     "7F 7F 7F 00  00 7F 7F 7F  7F 7F 00 7f  00"];
 
-  // pad 04 05 06 red 07 pink 08 09 dark red 10 11 dark yellow 12 13 bright yellow 14 15 dark yellow
+  // pad 04 05 06 red 07 pink 08 09 dark red 10 11 dark yellow 12 13 bright yellow 14 15 dark yellow 16 17 yellow 18 light green
 
-  // 80 rev flx addfile filelist= grid     shift hotcues samples sync keylock      cue play pad1 pad2 pad3
-  // pad4 pad5 pad6 pad7 pad8 sample       fx1 fx2 fx3 fx4 cuel      cuer voll1 voll2 voll3 voll4
-  // vol5 vol6clip volr1 volr2 volr3 volr4       volr5 volr6clip rev flx addfile filelist= grid shift hotcuest samples
+  // 00 01  02  03      04        05   06    07      08      09   10      11  12   13   14   15
+  // 80 rev flx addfile filelist= grid shift hotcues samples sync keylock cue play pad1 pad2 pad3
+  // 16   17   18   19   20   21     22  23  24  25  26   27   28    29    30    31
+  // pad4 pad5 pad6 pad7 pad8 sample fx1 fx2 fx3 fx4 cuel cuer voll1 voll2 voll3 voll4
+  // 32   33       34    35    36    37    38    39        40  41  42      43        44   45    46       47
+  // vol5 vol6clip volr1 volr2 volr3 volr4 volr5 volr6clip rev flx addfile filelist= grid shift hotcuest samples
+  // 48   49      50  51   52   53   54   55   56   57   58   59   60  61
+  // sync keylock cue play pad1 pad2 pad3 pad4 pad5 pad6 pad7 pad8 qnt mic
+
   //                   00 01 02 03  04 05 06 07  08 09 0A 0B  0C 0D 0E 0F
   var data_strings = ["80 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
                       "00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
-                      "00 00 00 00  00 00 00 00  00 00 00 00  0a 0a 0a 0a  \n" +
-                      "00 00 00 00  00",
-                      "81 00 00 7F  7F 03 7F 0B  03 7F 0B 03  7F 0B 03 7F  \n" +
+                      "00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
+                      "00 00 00 00  00 00 00 00  00 00 00 00  00 00",
+                      "81 0a 0a 0a  7F 03 7F 0B  03 7F 0B 03  7F 0B 03 7F  \n" +
                       "0B 03 7F 0B  03 00 7f 03  7F 0A 0A 0A  00 7f 0A 0A  \n" +
                       "00 7f 0A 0A  0A 0A 0A 0A  7F 0A 0a 0A  0a 0a 7f 0a  \n" +
                       "0a 0a 0a 0a  7F 0A 0A 0A  0a 0a 0a 0a  0a 0a 0a",
@@ -1018,21 +1006,25 @@ TraktorS2MK3.outputCallbackDark = function(value,group,key) {
 }
 
 TraktorS2MK3.outputCueCallback = function(value, group, key) {
-  var RGB_value = [0, 0, 0];
+
+  HIDDebug("TraktorS2MK3.outputCueCallback " + value + "-" + group + "-" + key);
+
+  var RGB_value = [0x18];
+  // var RGB_value = [0, 0, 0];
   // Use different colors that match cue colors
-  var num = key.charAt(7);
+  // var num = key.charAt(7);
   if (value === 1) {
-    if (num == '1') RGB_value = [0x40, 0x40, 0];
-    else if (num == '2') RGB_value = [0x40, 0, 0x40];
-    else if (num == '3') RGB_value = [0, 0x20, 0x20];
-    else if (num == '4') RGB_value = [0, 0x20, 0];
+  //   if (num == '1') RGB_value = [0x40, 0x40, 0];
+  //   else if (num == '2') RGB_value = [0x40, 0, 0x40];
+  //   else if (num == '3') RGB_value = [0, 0x20, 0x20];
+  //   else if (num == '4') RGB_value = [0, 0x20, 0];
   } else {
-    RGB_value = [0, 0, 0];
+    RGB_value = [0];
   }
 
   TraktorS2MK3.controller.setOutput(group, key, RGB_value[0], false);
-  TraktorS2MK3.controller.setOutput(group, "!" + key + "_G", RGB_value[1], false);
-  TraktorS2MK3.controller.setOutput(group, "!" + key + "_B", RGB_value[2], !TraktorS2MK3.controller.freeze_lights);
+  // TraktorS2MK3.controller.setOutput(group, "!" + key + "_G", RGB_value[1], false);
+  // TraktorS2MK3.controller.setOutput(group, "!" + key + "_B", RGB_value[2], !TraktorS2MK3.controller.freeze_lights);
 }
 
 TraktorS2MK3.onVuMeterChanged = function(value, group, key) {
