@@ -14,6 +14,9 @@
 // * Remix slots
 // * Effect lights
 
+// Resources
+// https://www.mixxx.org/wiki/doku.php/mixxxcontrols
+
 // ==== Friendly User Configuration ====
 // The Cue button, when Shift is also held, can have two possible functions:
 // 1. "REWIND": seeks to the very start of the track.
@@ -70,9 +73,9 @@ TraktorS2MK3 = new function() {
 }
 
 TraktorS2MK3.registerInputPackets = function() {
-  // selfnote: remember to change packet length
+  // selfnote: remember to check packet length
   MessageShort = new HIDPacket("shortmessage", [0x01], 20, this.shortMessageCallback);
-  MessageLong = new HIDPacket("longmessage", [0x02], 51, this.longMessageCallback);
+  MessageLong = new HIDPacket("longmessage", [0x02], 39, this.longMessageCallback);
 
   // Values in the short message are all buttons, except the jog wheels.
   // An exclamation point indicates a specially-handled function.  Everything else is a standard
@@ -81,9 +84,9 @@ TraktorS2MK3.registerInputPackets = function() {
   // on the deck switch state.  These are keywords in the HID library.
 
   MessageShort.addControl("[Channel1]", "!shift", 1, "B", 0x20);
-  MessageShort.addControl("[Channel1]", "!sync_enabled", 0x0B, "B", 0x04);
+  MessageShort.addControl("[Channel1]", "!sync_enabled", 2, "B", 0x01);
   MessageShort.addControl("[Channel1]", "!cue_default", 2, "B", 0x04);
-  MessageShort.addControl("[Channel1]", "!play", 2, "B", 8);
+  MessageShort.addControl("[Channel1]", "!play", 2, "B", 0x08);
   MessageShort.addControl("[Channel1]", "!hotcue1", 2, "B", 0x10);
   MessageShort.addControl("[Channel1]", "!hotcue2", 2, "B", 0x20);
   MessageShort.addControl("[Channel1]", "!hotcue3", 2, "B", 0x40);
@@ -95,13 +98,13 @@ TraktorS2MK3.registerInputPackets = function() {
 
   MessageShort.addControl("[Channel1]", "loop_out", 0x0C, "B", 0x80);
   MessageShort.addControl("[Channel1]", "loop_in", 0x0C, "B", 0x40);
-  //MessageShort.addControl("[Channel1]", "slip_enabled", 0x0E, "B", 0x02);
+  MessageShort.addControl("[Channel1]", "slip_enabled", 1, "B", 0x02);
   //MessageShort.addControl("[Channel1]", "!reset", 0x0E, "B", 0x01);
-  MessageShort.addControl("[Channel1]", "beatloop_activate", 0x0F, "B", 0x02);
+  // MessageShort.addControl("[Channel1]", "beatloop_activate", 0x0F, "B", 0x02);
   MessageShort.addControl("[Channel1]", "!loop_activate", 0x0F, "B", 0x01);
-  MessageShort.addControl("[Channel1]", "!jog_touch", 0x0A, "B", 0x01);
-  MessageShort.addControl("[Channel1]", "!jog_wheel", 0x01, "I");
-  MessageShort.addControl("[Channel1]", "!load_track", 0x0C, "B", 0x08);
+  MessageShort.addControl("[Channel1]", "!jog_touch", 8, "B", 0x40);
+  MessageShort.addControl("[Channel1]", "!jog_wheel", 12, "I");
+  MessageShort.addControl("[Channel1]", "!load_track", 7, "B", 0x01);
   //MessageShort.addControl("[Channel1]", "!FX1", 0x0E, "B", 0x10);
   //MessageShort.addControl("[Channel1]", "!FX2", 0x0E, "B", 0x80);
   //MessageShort.addControl("[Channel1]", "!FX3", 0x0E, "B", 0x40);
@@ -116,7 +119,7 @@ TraktorS2MK3.registerInputPackets = function() {
 
   // MessageShort.addControl("[Channel2]", "!shift", 0x09, "B", 0x08);
   // MessageShort.addControl("[Channel2]", "!sync_enabled", 0x09, "B", 0x04);
-  // MessageShort.addControl("[Channel2]", "!cue_default", 0x09, "B", 0x02);
+  MessageShort.addControl("[Channel2]", "!cue_default", 4, "B", 0x02);
   // MessageShort.addControl("[Channel2]", "!play", 0x05, "B", 0x32);
   // MessageShort.addControl("[Channel2]", "!hotcue1", 0x09, "B", 0x80);
   // MessageShort.addControl("[Channel2]", "!hotcue2", 0x09, "B", 0x40);
@@ -130,7 +133,7 @@ TraktorS2MK3.registerInputPackets = function() {
   // MessageShort.addControl("[Channel2]", "!loop_activate", 0x0F, "B", 0x08);
   // MessageShort.addControl("[Channel2]", "!jog_touch", 0x0A, "B", 0x02);
   // MessageShort.addControl("[Channel2]", "!jog_wheel", 0x05, "I");
-  // MessageShort.addControl("[Channel2]", "!load_track", 0x0C, "B", 0x04);
+  MessageShort.addControl("[Channel2]", "!load_track", 7, "B", 0x08);
   // //MessageShort.addControl("[Channel2]", "!FX1", 0x0D, "B", 0x04);
   // //MessageShort.addControl("[Channel2]", "!FX2", 0x0D, "B", 0x20);
   // //MessageShort.addControl("[Channel2]", "!FX3", 0x0D, "B", 0x10);
@@ -197,52 +200,57 @@ TraktorS2MK3.registerInputPackets = function() {
 
   // Most items in the long message are controls that go from 0-4096.
   // There are also some 4 bit encoders.
-  MessageLong.addControl("[Channel1]", "rate", 0x07, "H");
+
+  MessageLong.addControl("[Channel1]", "rate", 0x01, "H");
   MessageLong.addControl("[Channel2]", "rate", 0x09, "H");
   engine.softTakeover("[Channel1]", "rate", true);
   engine.softTakeover("[Channel2]", "rate", true);
-  MessageLong.addControl("[Channel1]", "!loopmove", 0x01, "B", 0x0F, undefined, true);
-  MessageLong.addControl("[Channel2]", "!loopmove", 0x02, "B", 0xF0, undefined, true);
-  MessageLong.setCallback("[Channel1]", "!loopmove", this.callbackLoopMove);
-  MessageLong.setCallback("[Channel2]", "!loopmove", this.callbackLoopMove);
-  MessageLong.addControl("[Channel1]", "!loopsize", 0x01, "B", 0xF0, undefined, true);
-  MessageLong.addControl("[Channel2]", "!loopsize", 0x03, "B", 0x0F, undefined, true);
-  MessageLong.setCallback("[Channel1]", "!loopsize", this.callbackLoopSize);
-  MessageLong.setCallback("[Channel2]", "!loopsize", this.callbackLoopSize);
+  // MessageLong.addControl("[Channel1]", "!loopmove", 0x01, "B", 0x0F, undefined, true);
+  // MessageLong.addControl("[Channel2]", "!loopmove", 0x02, "B", 0xF0, undefined, true);
+  // MessageLong.setCallback("[Channel1]", "!loopmove", this.callbackLoopMove);
+  // MessageLong.setCallback("[Channel2]", "!loopmove", this.callbackLoopMove);
+  // MessageLong.addControl("[Channel1]", "!loopsize", 0x01, "B", 0xF0, undefined, true);
+  // MessageLong.addControl("[Channel2]", "!loopsize", 0x03, "B", 0x0F, undefined, true);
+  // MessageLong.setCallback("[Channel1]", "!loopsize", this.callbackLoopSize);
+  // MessageLong.setCallback("[Channel2]", "!loopsize", this.callbackLoopSize);
 
-  MessageLong.addControl("[EffectRack1_EffectUnit1]", "mix", 0x17, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit1_Effect1]", "meta", 0x19, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit1_Effect2]", "meta", 0x1B, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit1_Effect3]", "meta", 0x1D, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit1]", "mix", 0x17, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit1_Effect1]", "meta", 0x19, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit1_Effect2]", "meta", 0x1B, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit1_Effect3]", "meta", 0x1D, "H");
 
-  MessageLong.addControl("[EffectRack1_EffectUnit2]", "mix", 0x1F, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit2_Effect1]", "meta", 0x21, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit2_Effect2]", "meta", 0x23, "H");
-  MessageLong.addControl("[EffectRack1_EffectUnit2_Effect3]", "meta", 0x25, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit2]", "mix", 0x1F, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit2_Effect1]", "meta", 0x21, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit2_Effect2]", "meta", 0x23, "H");
+  // MessageLong.addControl("[EffectRack1_EffectUnit2_Effect3]", "meta", 0x25, "H");
 
-  MessageLong.addControl("[Channel1]", "volume", 0x13, "H");
-  //MessageLong.addControl("[QuickEffectRack1_[Channel1]]", "super1", 0x1D, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter3", 0x27, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter2", 0x29, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter1", 0x2B, "H");
-  MessageLong.addControl("[Channel1]", "pregain", 0x03, "B", 0xF0, undefined, true);
-  MessageLong.setCallback("[Channel1]", "pregain", this.callbackPregain);
+  MessageLong.addControl("[Channel1]", "volume", 0x03, "H");
+  // //MessageLong.addControl("[QuickEffectRack1_[Channel1]]", "super1", 0x1D, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter3", 0x27, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter2", 0x29, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter1", 0x2B, "H");
+  // MessageLong.addControl("[Channel1]", "pregain", 0x03, "B", 0xF0, undefined, true);
+  // MessageLong.setCallback("[Channel1]", "pregain", this.callbackPregain);
 
-  MessageLong.addControl("[Channel2]", "volume", 0x15, "H");
-  //MessageLong.addControl("[QuickEffectRack1_[Channel2]]", "super1", 0x25, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter3", 0x2D, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter2", 0x2F, "H");
-  MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter1", 0x31, "H");
-  MessageLong.addControl("[Channel2]", "pregain", 0x04, "B", 0x0F, undefined, true);
-  MessageLong.setCallback("[Channel2]", "pregain", this.callbackPregain);
+  MessageLong.addControl("[Channel2]", "volume", 0x07, "H"); 
+
+  // //MessageLong.addControl("[QuickEffectRack1_[Channel2]]", "super1", 0x25, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter3", 0x2D, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter2", 0x2F, "H");
+  // MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter1", 0x31, "H");
+  // MessageLong.addControl("[Channel2]", "pregain", 0x04, "B", 0x0F, undefined, true);
+  // MessageLong.setCallback("[Channel2]", "pregain", this.callbackPregain);
 
   // The physical master button controls the internal sound card volume, so if we hook this
   // up the adjustment is double-applied.
   //MessageLong.addControl("[Master]", "volume", 0x11, "H");
   MessageLong.addControl("[Master]", "crossfader", 0x05, "H");
-  MessageLong.addControl("[Master]", "headMix", 0x0B, "H");
-  MessageLong.addControl("[Playlist]", "!browse", 0x02, "B", 0x0F, undefined, true);
-  MessageLong.setCallback("[Playlist]", "!browse", this.callbackBrowse);
+  MessageLong.addControl("[Master]", "headMix", 25, "H");
+
+  MessageShort.addControl("[Playlist]", "browse", 9, "H", undefined, undefined, true);
+  MessageShort.setCallback("[Playlist]", "browse", this.callbackBrowse);
+  MessageShort.addControl("[Playlist]", "browse", 10, "H", undefined, undefined, true);
+  MessageShort.setCallback("[Playlist]", "browse", this.callbackBrowse);
 
   this.controller.setScaler("volume", this.scalerVolume);
   this.controller.setScaler("headMix", this.scalerSlider);
@@ -454,30 +462,15 @@ TraktorS2MK3.init = function(id) {
   TraktorS2MK3.lightDeck("[Channel1]");
   TraktorS2MK3.lightDeck("[Channel2]");
 
-  TraktorS2MK3.debugLights();
+  // TraktorS2MK3.debugLights();
 
-  HIDDebug("TraktorS2MK3: done init");
+  HIDDebug("TraktorS2MK3: init done");
 }
 
 TraktorS2MK3.debugLights = function() {
+  HIDDebug("TraktorS2MK3: debugLights");
   // Call this if you want to just send raw packets to the controller (good for figuring out what
   // bytes do what).
-  //var data_strings = ["80 00 00 00 00 00 00 00 0A 00 00 00 00 00 00 00 0A 00 00 00 00 00 00 00 0A 00 00 00 00 00 00 00 0A 0A 0A 0A 0A 0A 0A 0A 0A 00 7F 00 00 00 00 0A 0A 0A 0A 0A 0A",
-  //                    "81 0B 03 00 0B 03 00 0B 03 00 0B 03 00 0B 03 00 0B 03 00 0B 03 00 0B 03 00 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 7F 0A 0A 0A 0A 0A 7F 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A",
-  //                    "82 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 0A 00 00 7F 7F 7F 7F 7F 7F 00 00 7F 7F 7F 7F 7F 00 00 00 7F 7F 7F 7F 7F 7F 00 00 7F 7F 7F 7F 7F 00 00 00"];
-  //                   00 01 02 03  04 05 06 07  08 09 0A 0B  0C 0D 0E 0F
-  // var data_strings = ["80 00 00 00  00 00 00 00  0A 00 00 00  00 00 00 00  \n" +
-  //                     "0A 00 00 00  00 00 00 00  0A 00 00 00  00 00 00 00  \n" +
-  //                     "0A 0A 0A 0A  0A 0A 0A 0A  0A 00 7F 00  00 00 00 0A  \n" +
-  //                     "0A 0A 0A 0A  0A",
-  //                     "81 00 00 7F  7F 03 7F 0B  03 7F 0B 03  7F 0B 03 7F  \n" +
-  //                     "0B 03 7F 0B  03 00 7f 03  7F 0A 0A 0A  00 7f 0A 0A  \n" +
-  //                     "00 7f 0A 0A  0A 0A 0A 0A  7F 0A 0a 0A  0a 0a 7f 0a  \n" +
-  //                     "0a 0a 0a 0a  7F 0A 0A 0A  0a 0a 0a 0a  0a 0a 0a",
-  //                     "82 0a 0A 0A  0a 0a 0a 0A  0A 0A 0A 0A  0a 0a 0A 0A  \n" +
-  //                     "0a 0a 0a 0a  0a 0a 0a 0a  0A 0A 0a 0a  00 00 00 00  \n" +
-  //                     "7f 00 00 7f  00 7F 7F 7F  7F 7F 7f 7f  00 7F 7F 7F  \n" +
-  //                     "7F 7F 7F 00  00 7F 7F 7F  7F 7F 00 7f  00"];
 
   // pad 04 05 06 red 07 pink 08 09 dark red 10 11 dark yellow 12 13 bright yellow 14 15 dark yellow 16 17 yellow 18 light green
 
@@ -494,21 +487,11 @@ TraktorS2MK3.debugLights = function() {
   var data_strings = ["80 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
                       "00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
                       "00 00 00 00  00 00 00 00  00 00 00 00  00 00 00 00  \n" +
-                      "00 00 00 00  00 00 00 00  00 00 00 00  00 00",
-                      "81 0a 0a 0a  7F 03 7F 0B  03 7F 0B 03  7F 0B 03 7F  \n" +
-                      "0B 03 7F 0B  03 00 7f 03  7F 0A 0A 0A  00 7f 0A 0A  \n" +
-                      "00 7f 0A 0A  0A 0A 0A 0A  7F 0A 0a 0A  0a 0a 7f 0a  \n" +
-                      "0a 0a 0a 0a  7F 0A 0A 0A  0a 0a 0a 0a  0a 0a 0a",
-                      "82 0a 0A 0A  0a 0a 0a 0A  0A 0A 0A 0A  0a 0a 0A 0A  \n" +
-                      "0a 0a 0a 0a  0a 0a 0a 0a  0A 0A 0a 0a  00 00 00 00  \n" +
-                      "7f 00 00 7f  00 7F 7F 7F  7F 7F 7f 7f  00 7F 7F 7F  \n" +
-                      "7F 7F 7F 00  00 7F 7F 7F  7F 7F 00 7f  00"];
+                      "00 00 00 00  00 00 00 00  00 00 00 00  00 00"];
 
-  var data = [Object(), Object(), Object()];
+  var data = [Object()];
 
-  HIDDebug("TraktorS2MK3: debugLights");
-
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 1; i++) {
     var ok = true;
     var splitted = data_strings[i].split(/\s+/);
     HIDDebug("i" + i + " " + splitted);
@@ -933,18 +916,13 @@ TraktorS2MK3.callbackBrowse = function(field) {
   // TODO: common-hid-packet-parser looks like it should do deltas, but I can't get them to work.
   prev_browse = TraktorS2MK3.controller.prev_browse;
   TraktorS2MK3.controller.prev_browse = field.value;
-  var delta = 0;
-  if (prev_browse === 15 && field.value === 0) {
-    delta = 1;
-  } else if (prev_browse === 0 && field.value === 15) {
-    delta = -1;
-  } else if (field.value > prev_browse) {
-    delta = 1;
-  } else {
-    delta = -1;
+  HIDDebug("TraktorS2MK3.callbackBrowse " + field.value + " " + prev_browse);
+  if (prev_browse > field.value) {
+    engine.setValue("[Playlist]", "SelectTrackKnob", 1);
+  } else if (prev_browse < field.value) {
+    engine.setValue("[Playlist]", "SelectTrackKnob", -1);
   }
 
-  engine.setValue("[Playlist]", "SelectTrackKnob", delta);
 }
 
 TraktorS2MK3.scalerParameter = function(group, name, value) {
