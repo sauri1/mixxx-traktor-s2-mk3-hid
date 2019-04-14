@@ -1,0 +1,14 @@
+<?xml version='1.0' encoding='utf-8'?>
+<MixxxControllerPreset mixxxVersion="2.0.0" schemaVersion="1">
+    <info>
+        <name>Traktor Kontrol S2 MK2</name>
+        <author>Antti Puranen</author>
+        <description>HID Mapping for Traktor Kontrol S2 MK3</description>
+    </info>
+    <controller id="Traktor">
+        <scriptfiles>
+            <file functionprefix="" filename="common-hid-packet-parser.js"/>
+            <file functionprefix="TraktorS2MK3" filename="Traktor-Kontrol-S2-MK3-hid-scripts.js"/>
+        </scriptfiles>
+    </controller>
+</MixxxControllerPreset>
