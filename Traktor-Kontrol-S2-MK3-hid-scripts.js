@@ -25,23 +25,24 @@
 // https://github.com/mixxxdj/mixxx/tree/master/res/controllers
 
 // ==== Friendly User Configuration ====
-// The Directory buttons, can have one possible functions:
+// The Directory buttons, can have 1 possible function:
 // 1. "NORMAL": show song list in full screen
 DirectoryButtonMode = "NORMAL";
-// Transport buttons (FLX/REV) can have two possible functions:
+
+// Transport buttons (FLX/REV) can have 2 possible functions:
 // 1. "NORMAL": FLX change slip mode, REV plays track in revense
 // 2. "LOOP": mark loop start with FLX, mark loop end with REV
 TransportButtonMode = "NORMAL";
 
-// Hotcue/Samples can have two possible functions:
+// Hotcue/Samples can have 2 possible functions:
 // 1. "NORMAL": HOTCUE show hotcues and SAMPLES show samples in 8 buttons (not implemented)
 // 2. "LOOP": mark loop start with HOTCUE, mark loop end with SAMPLES
 HotcueSamplesButtonMode = "LOOP";
 
-// Hotcue/Samples can have two possible functions:
+// Hotcue/Samples can have 3 possible functions:
 // 1. "TRAKTOR": Like traktor (not implemented)
 // 2. "MIXXX": 1 and 3 activates Channel 1 fx effects 1 and 3, 2 and 4 activates Channel 2 fx effects 2 and 4
-// 3. "SUPER" 
+// 3. "SUPER"
 FxButtonMode = "MIXXX";
 
 
@@ -53,6 +54,9 @@ HotCueColor = "LIGHTBLUE";
 // Play and cue buttons darken out completely instead of staying dim
 PlayCueDark = false;
 
+// false for dimmer led color, true for brighter
+BrightLowColor = false;
+
 TraktorS2MK3 = new function() {
   this.controller = new HIDController();
   // TODO: Decide if these should be part of this.controller instead.
@@ -62,7 +66,6 @@ TraktorS2MK3 = new function() {
   this.ledcolor = {
     "high": 0x0F,
     "mid": 0x0A,
-    "low": 0x05,
     "off": 0x00,
 
     "red1": 0x04,
@@ -76,11 +79,16 @@ TraktorS2MK3 = new function() {
     "lightblue": 0x29
   };
 
+  if (BrightLowColor) {
+      this.ledcolor.low = "0x05";
+  } else {
+      this.ledcolor.low = "0x04";
+  }
 
   this.DirectoryButtonMode = DirectoryButtonMode;
   this.TransportButtonMode = TransportButtonMode;
   this.HotcueSamplesButtonMode = HotcueSamplesButtonMode;
-  
+
   this.HotCueColor = this.ledcolor[HotCueColor.toLowerCase()];
 
   // When true, packets will not be sent to the controller.  Good for doing mass updates.
@@ -116,12 +124,12 @@ TraktorS2MK3 = new function() {
 
   // scratch overrides
   // TODO: these can probably be removed, or should be used in my custom scratch code.
-  this.controller.scratchintervalsPerRev = 1024;
-  this.controller.scratchRPM = 33+1/3;
-  this.controller.scratchAlpha = 1.0 / 8;
-  this.controller.scratchBeta = this.controller.scratchAlpha / 8;
-  this.controller.scratchRampOnEnable = true;
-  this.controller.scratchRampOnDisable = true;
+  // this.controller.scratchintervalsPerRev = 1024;
+  // this.controller.scratchRPM = 33+1/3;
+  // this.controller.scratchAlpha = 1.0 / 8;
+  // this.controller.scratchBeta = this.controller.scratchAlpha / 8;
+  // this.controller.scratchRampOnEnable = true;
+  // this.controller.scratchRampOnDisable = true;
 
 }
 
@@ -137,9 +145,18 @@ TraktorS2MK3.registerInputPackets = function() {
   // on the deck switch state.  These are keywords in the HID library.
 
   MessageShort.addControl("[Channel1]", "!sync_enabled", 2, "B", 0x01);
+  MessageShort.addControl("[Channel2]", "!sync_enabled", 5, "B", 0x04);
+
   MessageShort.addControl("[Channel1]", "keylock", 2, "B", 0x02);
+  MessageShort.addControl("[Channel2]", "keylock", 5, "B", 0x08);
+
   MessageShort.addControl("[Channel1]", "!cue_default", 2, "B", 0x04);
+  MessageShort.addControl("[Channel2]", "!cue_default", 5, "B", 0x10);
+
   MessageShort.addControl("[Channel1]", "!play", 2, "B", 0x08);
+  MessageShort.addControl("[Channel2]", "!play", 5, "B", 0x20);
+
+
   MessageShort.addControl("[Channel1]", "!hotcue1", 2, "B", 0x10);
   MessageShort.addControl("[Channel1]", "!hotcue2", 2, "B", 0x20);
   MessageShort.addControl("[Channel1]", "!hotcue3", 2, "B", 0x40);
@@ -148,17 +165,6 @@ TraktorS2MK3.registerInputPackets = function() {
   MessageShort.addControl("[Channel1]", "!hotcue6", 3, "B", 0x02);
   MessageShort.addControl("[Channel1]", "!hotcue7", 3, "B", 0x04);
   MessageShort.addControl("[Channel1]", "!hotcue8", 3, "B", 0x08);
-
-  MessageShort.addControl("[Channel1]", "beatloop_activate", 7, "B", 0x04);
-  MessageShort.addControl("[Channel1]", "reloop_toggle", 7, "B", 0x02);
-  MessageShort.addControl("[Channel1]", "!jog_touch", 8, "B", 0x40);
-  MessageShort.addControl("[Channel1]", "!jog_wheel", 12, "I");
-  MessageShort.addControl("[Channel1]", "!load_track", 7, "B", 0x01);
-
-  MessageShort.addControl("[Channel2]", "!sync_enabled", 5, "B", 0x04);
-  MessageShort.addControl("[Channel2]", "keylock", 5, "B", 0x08);
-  MessageShort.addControl("[Channel2]", "!cue_default", 5, "B", 0x10);
-  MessageShort.addControl("[Channel2]", "!play", 5, "B", 0x20);
   MessageShort.addControl("[Channel2]", "!hotcue1", 5, "B", 0x40);
   MessageShort.addControl("[Channel2]", "!hotcue2", 5, "B", 0x80);
   MessageShort.addControl("[Channel2]", "!hotcue3", 6, "B", 0x01);
@@ -167,10 +173,20 @@ TraktorS2MK3.registerInputPackets = function() {
   MessageShort.addControl("[Channel2]", "!hotcue6", 6, "B", 0x08);
   MessageShort.addControl("[Channel2]", "!hotcue7", 6, "B", 0x10);
   MessageShort.addControl("[Channel2]", "!hotcue8", 6, "B", 0x20);
+
+  MessageShort.addControl("[Channel1]", "beatloop_activate", 7, "B", 0x04);
   MessageShort.addControl("[Channel2]", "beatloop_activate", 7, "B", 0x20);
+
+  MessageShort.addControl("[Channel1]", "reloop_toggle", 7, "B", 0x02);
   MessageShort.addControl("[Channel2]", "reloop_toggle", 7, "B", 0x10);
+
+  MessageShort.addControl("[Channel1]", "!jog_touch", 8, "B", 0x40);
   MessageShort.addControl("[Channel2]", "!jog_touch", 8, "B", 0x80);
+
+  MessageShort.addControl("[Channel1]", "!jog_wheel", 12, "I");
   MessageShort.addControl("[Channel2]", "!jog_wheel", 16, "I");
+
+  MessageShort.addControl("[Channel1]", "!load_track", 7, "B", 0x01);
   MessageShort.addControl("[Channel2]", "!load_track", 7, "B", 0x08);
 
   MessageShort.addControl("[Channel1]", "pfl", 4, "B", 0x01);
@@ -180,19 +196,21 @@ TraktorS2MK3.registerInputPackets = function() {
   MessageShort.addControl("[Channel2]", "!directorybutton", 4, "B", 0x20);
 
   MessageShort.addControl("[Channel1]", "!grid", 1, "B", 0x10);
-  MessageShort.addControl("[Channel2]", "!grid", 4, "B", 0x40);
   MessageShort.setCallback("[Channel1]", "!grid", this.gridHandler);
+  MessageShort.addControl("[Channel2]", "!grid", 4, "B", 0x40);
   MessageShort.setCallback("[Channel2]", "!grid", this.gridHandler);
 
   if (TraktorS2MK3.TransportButtonMode === "NORMAL") {
-    MessageShort.addControl("[Channel1]", "reverseroll", 1, "B", 0x01);
+    MessageShort.addControl("[Channel1]", "!reverseroll", 1, "B", 0x01);
+    MessageShort.setCallback("[Channel1]", "!reverseroll", this.reverseHandler);
+    MessageShort.addControl("[Channel2]", "!reverseroll", 4, "B", 0x04);
+    MessageShort.setCallback("[Channel2]", "!reverseroll", this.reverseHandler);
     MessageShort.addControl("[Channel1]", "slip_enabled", 1, "B", 0x02);
-    MessageShort.addControl("[Channel2]", "reverseroll", 4, "B", 0x04);
     MessageShort.addControl("[Channel2]", "slip_enabled", 4, "B", 0x08);
   } else if (TraktorS2MK3.TransportButtonMode === "LOOP") {
     MessageShort.addControl("[Channel1]", "loop_in", 1, "B", 0x01);
-    MessageShort.addControl("[Channel1]", "loop_out", 1, "B", 0x02);
     MessageShort.addControl("[Channel2]", "loop_in", 4, "B", 0x04);
+    MessageShort.addControl("[Channel1]", "loop_out", 1, "B", 0x02);
     MessageShort.addControl("[Channel2]", "loop_out", 4, "B", 0x08);
   }
 
@@ -200,8 +218,8 @@ TraktorS2MK3.registerInputPackets = function() {
     // not implemented
   } else if (TraktorS2MK3.HotcueSamplesButtonMode === "LOOP") {
     MessageShort.addControl("[Channel1]", "loop_in", 1, "B", 0x40);
-    MessageShort.addControl("[Channel1]", "loop_out", 1, "B", 0x80);
     MessageShort.addControl("[Channel2]", "loop_in", 5, "B", 0x01);
+    MessageShort.addControl("[Channel1]", "loop_out", 1, "B", 0x80);
     MessageShort.addControl("[Channel2]", "loop_out", 5, "B", 0x02);
   }
 
@@ -268,7 +286,7 @@ TraktorS2MK3.registerInputPackets = function() {
 
   MessageShort.setCallback("[Channel1]", "!directorybutton", this.directoryButtonHandler);
   MessageShort.setCallback("[Channel2]", "!directorybutton", this.directoryButtonHandler);
-  
+
   // TODO: the rest of the "!" controls.
   this.controller.registerInputPacket(MessageShort);
 
@@ -287,7 +305,7 @@ TraktorS2MK3.registerInputPackets = function() {
   MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter1", 17, "H");
   MessageLong.addControl("[Channel1]", "pregain", 11, "H");
 
-  MessageLong.addControl("[Channel2]", "volume", 7, "H"); 
+  MessageLong.addControl("[Channel2]", "volume", 7, "H");
   MessageLong.addControl("[QuickEffectRack1_[Channel2]]", "super1", 37, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter3", 31, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter2", 33, "H");
@@ -382,14 +400,14 @@ TraktorS2MK3.registerOutputPackets = function() {
   Output1.addOutput("[Channel2]", "!grid", 44, "B");
 
   if (TraktorS2MK3.TransportButtonMode === "NORMAL") {
-    Output1.addOutput("[Channel1]", "reverseroll", 1, "B");
+    Output1.addOutput("[Channel1]", "!reverseroll", 1, "B");
+    Output1.addOutput("[Channel2]", "!reverseroll", 40, "B");
     Output1.addOutput("[Channel1]", "slip_enabled", 2, "B");
-    Output1.addOutput("[Channel2]", "reverseroll", 40, "B");
     Output1.addOutput("[Channel2]", "slip_enabled", 41, "B");
   } else if (TraktorS2MK3.TransportButtonMode === "LOOP") {
     Output1.addOutput("[Channel1]", "loop_in", 1, "B");
-    Output1.addOutput("[Channel1]", "loop_out", 2, "B");
     Output1.addOutput("[Channel2]", "loop_in", 40, "B");
+    Output1.addOutput("[Channel1]", "loop_out", 2, "B");
     Output1.addOutput("[Channel2]", "loop_out", 41, "B");
   }
 
@@ -397,8 +415,8 @@ TraktorS2MK3.registerOutputPackets = function() {
     // not implemented
   } else if (TraktorS2MK3.HotcueSamplesButtonMode === "LOOP") {
     Output1.addOutput("[Channel1]", "loop_in", 7, "B");
-    Output1.addOutput("[Channel1]", "loop_out", 8, "B");
     Output1.addOutput("[Channel2]", "loop_in", 46, "B");
+    Output1.addOutput("[Channel1]", "loop_out", 8, "B");
     Output1.addOutput("[Channel2]", "loop_out", 47, "B");
   }
 
@@ -446,11 +464,13 @@ TraktorS2MK3.registerOutputPackets = function() {
   TraktorS2MK3.linkDeckOutputs("keylock", TraktorS2MK3.outputCallbackDark);
   TraktorS2MK3.linkDeckOutputs("LoadSelectedTrack", TraktorS2MK3.outputCallback);
   TraktorS2MK3.linkDeckOutputs("slip_enabled", TraktorS2MK3.outputCallback);
-
+ 
   TraktorS2MK3.linkChannelOutput("[Channel1]", "pfl", TraktorS2MK3.outputChannelCallback);
   TraktorS2MK3.linkChannelOutput("[Channel2]", "pfl", TraktorS2MK3.outputChannelCallback);
+
   TraktorS2MK3.linkChannelOutput("[Channel1]", "track_samples", TraktorS2MK3.outputChannelCallback);
   TraktorS2MK3.linkChannelOutput("[Channel2]", "track_samples", TraktorS2MK3.outputChannelCallback);
+
   TraktorS2MK3.linkChannelOutput("[Channel1]", "PeakIndicator", TraktorS2MK3.outputChannelCallbackDark);
   TraktorS2MK3.linkChannelOutput("[Channel2]", "PeakIndicator", TraktorS2MK3.outputChannelCallbackDark);
 
@@ -500,12 +520,13 @@ TraktorS2MK3.lightDeck = function(group) {
     // turn lights on for specific buttons
     // Shift is a weird key because there's no CO that it is actually associated with.
     TraktorS2MK3.outputCallback(0, group, "!shift");
+
     // turn grid light on
     TraktorS2MK3.outputCallback(0, group, "!grid");
 
     if (TraktorS2MK3.TransportButtonMode === "NORMAL") {
       // turn rev light on
-      TraktorS2MK3.outputCallback(0, group, "reverseroll");
+      TraktorS2MK3.outputCallback(0, group, "!reverseroll");
     }
   }
 
@@ -638,16 +659,25 @@ TraktorS2MK3.longMessageCallback = function(packet, data) {
 
 TraktorS2MK3.shiftHandler = function(field) {
   var group = field.id.split(".")[0];
- 
+
   HIDDebug("TraktorS2MK3.shiftHandler " + field.group + " " + field.value);
 
   TraktorS2MK3.controller.shift_pressed[group] = field.value;
   TraktorS2MK3.outputCallback(field.value, field.group, "!shift");
 }
 
+TraktorS2MK3.reverseHandler = function(field) {
+  var group = field.id.split(".")[0];
+
+  HIDDebug("TraktorS2MK3.reverseHandler " + field.group + " " + field.value);
+
+  TraktorS2MK3.outputCallback(field.value, field.group, "!reverseroll");
+  engine.setValue(field.group, "reverseroll", field.value);
+}
+
 TraktorS2MK3.gridHandler = function(field) {
   var group = field.id.split(".")[0];
- 
+
   HIDDebug("TraktorS2MK3.gridHandler " + field.group + " " + field.value);
 
   if (TraktorS2MK3.controller.shift_pressed[group]) {
@@ -655,7 +685,6 @@ TraktorS2MK3.gridHandler = function(field) {
   }
 
 }
-
 
 TraktorS2MK3.loadTrackHandler = function(field) {
   var splitted = field.id.split(".");
@@ -815,18 +844,16 @@ TraktorS2MK3.jogMoveHandler = function(field) {
   var tick_delta = deltas[0];
   var time_delta = deltas[1];
 
-  var velocity = TraktorS2MK3.scalerJog(tick_delta, time_delta);
+  if (TraktorS2MK3.controller.shift_pressed[field.group]) {
+      tick_delta = tick_delta * 5;
+  }
 
+  HIDDebug("TraktorS2MK3.jogMoveHandlershift " + tick_delta + " " + time_delta);
+
+  var velocity = TraktorS2MK3.scalerJog(tick_delta, time_delta);
 
   engine.setValue(field.group, "jog", velocity);
   if (engine.getValue(field.group, "scratch2_enable")) {
-
-    if (TraktorS2MK3.controller.shift_pressed[field.group]) {
-        tick_delta = tick_delta * 5;
-        // HIDDebug("TraktorS2MK3.jogMoveHandlershift " + tick_delta + " " + time_delta);
-    } else {
-        // HIDDebug("TraktorS2MK3.jogMoveHandler      " + tick_delta + " " + time_delta);
-    }
 
     var deckNumber = TraktorS2MK3.controller.resolveDeck(group);
     engine.scratchTick(deckNumber, tick_delta);
@@ -916,6 +943,22 @@ TraktorS2MK3.fxHandler = function(field) {
   var buttonNumber = parseInt(field.name[field.name.length - 1]);
 
   HIDDebug("TraktorS2MK3.fxHandler " + group + " " + buttonNumber);
+
+  // if (buttonNumber === 1) {
+
+  // does not work
+  HIDDebug("test=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "enabled") );
+  HIDDebug("test=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "super1") );
+
+  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "chain_selector") );
+  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel2]]", "chain_selector") );
+  engine.setValue("[QuickEffectRack1_[Channel1]]", "focused_effect", buttonNumber);
+  engine.setValue("[QuickEffectRack1_[Channel2]]", "focused_effect", buttonNumber);
+
+  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "chain_selector") );
+  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel2]]", "chain_selector") );
+
+  // }
 
 }
 
