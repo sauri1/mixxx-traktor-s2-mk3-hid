@@ -17,8 +17,6 @@
 // * functionality for two buttons under browse, currently directory button shows directory in full screen
 // * mic
 // * grid move with jogwheel? grid button now sets only grid position
-// * effects
-// * directorybutton give some errors
 
 // Resources
 // https://www.mixxx.org/wiki/doku.php/mixxxcontrols
@@ -39,13 +37,6 @@ TransportButtonMode = "NORMAL";
 // 2. "LOOP": mark loop start with HOTCUE, mark loop end with SAMPLES
 HotcueSamplesButtonMode = "LOOP";
 
-// Hotcue/Samples can have 3 possible functions:
-// 1. "TRAKTOR": Like traktor (not implemented)
-// 2. "MIXXX": 1 and 3 activates Channel 1 fx effects 1 and 3, 2 and 4 activates Channel 2 fx effects 2 and 4
-// 3. "SUPER"
-FxButtonMode = "MIXXX";
-
-
 HotCueColor = "LIGHTBLUE";
 
 // start pad mode, "HOTCUES" or "SAMPLES"
@@ -63,7 +54,7 @@ TraktorS2MK3 = new function() {
   this.partial_packet = Object();
   this.divisor_map = Object();
 
-  this.ledcolor = {
+  this.controller.ledcolor = {
     "high": 0x0F,
     "mid": 0x0A,
     "off": 0x00,
@@ -80,16 +71,16 @@ TraktorS2MK3 = new function() {
   };
 
   if (BrightLowColor) {
-      this.ledcolor.low = "0x05";
+      this.controller.ledcolor.low = "0x05";
   } else {
-      this.ledcolor.low = "0x04";
+      this.controller.ledcolor.low = "0x04";
   }
 
   this.DirectoryButtonMode = DirectoryButtonMode;
   this.TransportButtonMode = TransportButtonMode;
   this.HotcueSamplesButtonMode = HotcueSamplesButtonMode;
 
-  this.HotCueColor = this.ledcolor[HotCueColor.toLowerCase()];
+  this.HotCueColor = this.controller.ledcolor[HotCueColor.toLowerCase()];
 
   // When true, packets will not be sent to the controller.  Good for doing mass updates.
   this.controller.freeze_lights = false;
@@ -299,14 +290,22 @@ TraktorS2MK3.registerInputPackets = function() {
   engine.softTakeover("[Channel2]", "rate", true);
 
   MessageLong.addControl("[Channel1]", "volume", 3, "H");
-  MessageLong.addControl("[QuickEffectRack1_[Channel1]]", "super1", 19, "H");
+
+  MessageLong.addControl("[Channel1]", "!super1", 19, "H");
+  MessageLong.setCallback("[Channel1]", "!super1", this.super1Handler);
+  // MessageLong.addControl("[QuickEffectRack1_[Channel1]]", "super1", 19, "H");
+
   MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter3", 13, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter2", 15, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel1]_Effect1]", "parameter1", 17, "H");
   MessageLong.addControl("[Channel1]", "pregain", 11, "H");
 
   MessageLong.addControl("[Channel2]", "volume", 7, "H");
-  MessageLong.addControl("[QuickEffectRack1_[Channel2]]", "super1", 37, "H");
+
+  MessageLong.addControl("[Channel2]", "!super1", 37, "H");
+  MessageLong.setCallback("[Channel2]", "!super1", this.super1Handler);
+  // MessageLong.addControl("[QuickEffectRack1_[Channel2]]", "super1", 37, "H");
+
   MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter3", 31, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter2", 33, "H");
   MessageLong.addControl("[EqualizerRack1_[Channel2]_Effect1]", "parameter1", 35, "H");
@@ -333,7 +332,7 @@ TraktorS2MK3.registerInputPackets = function() {
   this.controller.setScaler("parameter1", this.scalerParameter);
   this.controller.setScaler("parameter2", this.scalerParameter);
   this.controller.setScaler("parameter3", this.scalerParameter);
-  this.controller.setScaler("super1", this.scalerParameter);
+  this.controller.setScaler("!super1", this.scalerParameter);
   this.controller.setScaler("crossfader", this.scalerSlider);
   this.controller.setScaler("rate", this.scalerSlider);
   this.controller.setScaler("mix", this.scalerParameter);
@@ -420,10 +419,10 @@ TraktorS2MK3.registerOutputPackets = function() {
     Output1.addOutput("[Channel2]", "loop_out", 47, "B");
   }
 
-  // Output1.addOutput("[Master]", "!FX1", 22, "B");
-  // Output1.addOutput("[Master]", "loop_out", 23, "B");
-  // Output1.addOutput("[Master]", "fx_3_enabled", 24, "B");
-  // Output1.addOutput("[Master]", "fx_4_enabled", 25, "B");
+  Output1.addOutput("[Master]", "FX1", 22, "B");
+  Output1.addOutput("[Master]", "FX2", 23, "B");
+  Output1.addOutput("[Master]", "FX3", 24, "B");
+  Output1.addOutput("[Master]", "FX4", 25, "B");
 
   this.controller.registerOutputPacket(Output1);
 
@@ -436,18 +435,6 @@ TraktorS2MK3.registerOutputPackets = function() {
     TraktorS2MK3.linkDeckOutputs("cue_indicator", TraktorS2MK3.outputCallback);
     TraktorS2MK3.linkDeckOutputs("play_indicator", TraktorS2MK3.outputCallback);
   }
-
-  TraktorS2MK3.linkDeckOutputs("directorybutton", TraktorS2MK3.outputCallback);
-
-  // TraktorS2MK3.linkChannelOutputs("[Master]", "!FX1", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkChannelOutputs("[Master]", "!FX2", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkChannelOutputs("[Master]", "!FX3", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkChannelOutputs("[Master]", "!FX4", TraktorS2MK3.outputCallback);
-
-  // TraktorS2MK3.linkDeckOutputs("fx_1_enabled", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkDeckOutputs("fx_2_enabled", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkDeckOutputs("fx_3_enabled", TraktorS2MK3.outputCallback);
-  // TraktorS2MK3.linkDeckOutputs("fx_4_enabled", TraktorS2MK3.outputCallback);
 
   TraktorS2MK3.linkDeckOutputs("hotcue_1_enabled", TraktorS2MK3.outputCueCallback);
   TraktorS2MK3.linkDeckOutputs("hotcue_2_enabled", TraktorS2MK3.outputCueCallback);
@@ -464,7 +451,7 @@ TraktorS2MK3.registerOutputPackets = function() {
   TraktorS2MK3.linkDeckOutputs("keylock", TraktorS2MK3.outputCallbackDark);
   TraktorS2MK3.linkDeckOutputs("LoadSelectedTrack", TraktorS2MK3.outputCallback);
   TraktorS2MK3.linkDeckOutputs("slip_enabled", TraktorS2MK3.outputCallback);
- 
+
   TraktorS2MK3.linkChannelOutput("[Channel1]", "pfl", TraktorS2MK3.outputChannelCallback);
   TraktorS2MK3.linkChannelOutput("[Channel2]", "pfl", TraktorS2MK3.outputChannelCallback);
 
@@ -528,6 +515,7 @@ TraktorS2MK3.lightDeck = function(group) {
       // turn rev light on
       TraktorS2MK3.outputCallback(0, group, "!reverseroll");
     }
+
   }
 
   this.controller.freeze_lights = false;
@@ -547,12 +535,13 @@ TraktorS2MK3.init = function(id) {
   TraktorS2MK3.master_quantize = engine.getValue("[Channel1]", "quantize");
   engine.setValue("[Channel1]", "quantize", TraktorS2MK3.master_quantize);
   engine.setValue("[Channel2]", "quantize", TraktorS2MK3.master_quantize);
-  TraktorS2MK3.controller.setOutput("[Master]", "!quantize", TraktorS2MK3.ledcolor.high * TraktorS2MK3.master_quantize, true);
+  TraktorS2MK3.controller.setOutput("[Master]", "!quantize", (TraktorS2MK3.master_quantize) ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
 
-  // engine.setValue("[Master]", "fx_1_enabled", false);
-  // engine.setValue("[Master]", "fx_2_enabled", false);
-  // engine.setValue("[Master]", "fx_3_enabled", false);
-  // engine.setValue("[Master]", "fx_4_enabled", false);
+  // set fx select leds
+  TraktorS2MK3.controller.setOutput("[Master]", "FX1", engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel1]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+  TraktorS2MK3.controller.setOutput("[Master]", "FX2", engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel1]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+  TraktorS2MK3.controller.setOutput("[Master]", "FX3", engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel2]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+  TraktorS2MK3.controller.setOutput("[Master]", "FX4", engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel2]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
 
   TraktorS2MK3.outputChannelCallback(engine.getValue("[InternalClock]", "sync_master"), "[InternalClock]", "sync_master");
   TraktorS2MK3.lightDeck("[Preview[Channel1]]");
@@ -676,12 +665,19 @@ TraktorS2MK3.reverseHandler = function(field) {
 }
 
 TraktorS2MK3.gridHandler = function(field) {
+  if (field.value === 0) {
+    return;
+  }
+
   var group = field.id.split(".")[0];
 
-  HIDDebug("TraktorS2MK3.gridHandler " + field.group + " " + field.value);
+  // HIDDebug("TraktorS2MK3.gridHandler " + field.group + " " + field.value);
 
   if (TraktorS2MK3.controller.shift_pressed[group]) {
+    // set beatgrid
     engine.setValue(field.group, "beats_translate_curpos", 1);
+  } else {
+    // do something else
   }
 
 }
@@ -696,6 +692,7 @@ TraktorS2MK3.loadTrackHandler = function(field) {
   }
 }
 
+// remove
 TraktorS2MK3.effectEnabledHandler = function(field) {
   var splitted = field.id.split(".");
   var group = splitted[0];
@@ -800,7 +797,9 @@ TraktorS2MK3.jogTouchHandler = function(field) {
   }
   if (field.value !== 0) {
     var deckNumber = TraktorS2MK3.controller.resolveDeck(group);
+
     engine.scratchEnable(deckNumber, 1024, 33.3333, 0.125, 0.125/8, true);
+
   } else {
     // The wheel touch sensor can be overly sensitive, so don't release scratch mode right away.
     // Depending on how fast the platter was moving, lengthen the time we'll wait.
@@ -844,6 +843,7 @@ TraktorS2MK3.jogMoveHandler = function(field) {
   var tick_delta = deltas[0];
   var time_delta = deltas[1];
 
+  // increase tick_delta when shift is pressed for faster jogwheel scrub
   if (TraktorS2MK3.controller.shift_pressed[field.group]) {
       tick_delta = tick_delta * 5;
   }
@@ -937,28 +937,78 @@ TraktorS2MK3.hotcueHandler = function(field) {
 //   // }
 // }
 
+TraktorS2MK3.super1Handler = function(field) {
+  var group = field.id.split(".")[0];
+  var effectunit;
+
+  // HIDDebug("TraktorS2MK3.super1 " + group + " " + field.value + " " + effectunit);
+
+  engine.setValue("[QuickEffectRack1_" + field.group + "]", "super1", field.value/4096);
+
+  if (engine.getValue("[EffectRack1_EffectUnit1]", "group_" + field.group + "_enable") ) {
+    // change normal effect metaknob
+    engine.setValue("[EffectRack1_EffectUnit1]", "super1", field.value/4096);
+  }
+  if (engine.getValue("[EffectRack1_EffectUnit2]", "group_" + field.group + "_enable")) {
+    // change normal effect metaknob
+    engine.setValue("[EffectRack1_EffectUnit2]", "super1", field.value/4096);
+  }
+
+
+  // if (engine.getValue("[EffectRack1_EffectUnit1]", "group_" + field.group + "_enable") || engine.getValue("[EffectRack1_EffectUnit2]", "group_" + field.group + "_enable")) {
+  //   // change normal effect metaknob
+  //   engine.setValue(effectunit, "super1", field.value/4096);
+  // }
+
+  // engine.setValue("[EffectRack1_EffectUnit1]", "super1", field.value/4096);
+  // engine.setValue("[EffectRack1_EffectUnit2]", "super1", field.value/4096);
+  // engine.setValue("[EffectRack1_EffectUnit3]", "super1", field.value/4096);
+  // engine.setValue("[EffectRack1_EffectUnit4]", "super1", field.value/4096);
+
+}
 
 TraktorS2MK3.fxHandler = function(field) {
+  if (field.value === 0) {
+    return;
+  }
+
   var group = field.id.split(".")[0];
   var buttonNumber = parseInt(field.name[field.name.length - 1]);
 
-  HIDDebug("TraktorS2MK3.fxHandler " + group + " " + buttonNumber);
+  // HIDDebug("TraktorS2MK3.fxHandler " + group + " " + buttonNumber + " " + field.value);
 
-  // if (buttonNumber === 1) {
+  if (buttonNumber === 1 || buttonNumber === 2) {
+    script.toggleControl("[EffectRack1_EffectUnit" + buttonNumber + "]", "group_[Channel1]_enable");
 
-  // does not work
-  HIDDebug("test=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "enabled") );
-  HIDDebug("test=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "super1") );
+    TraktorS2MK3.controller.setOutput("[Master]", "FX1", engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel1]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+    TraktorS2MK3.controller.setOutput("[Master]", "FX2", engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel1]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
 
-  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "chain_selector") );
-  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel2]]", "chain_selector") );
-  engine.setValue("[QuickEffectRack1_[Channel1]]", "focused_effect", buttonNumber);
-  engine.setValue("[QuickEffectRack1_[Channel2]]", "focused_effect", buttonNumber);
+    if (engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel1]_enable") || engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel1]_enable")) {
+      // disable effect
+      engine.setValue("[QuickEffectRack1_[Channel1]_Effect1]", "enabled", 0);
+    }
+    else {
+      // enable effect
+      engine.setValue("[QuickEffectRack1_[Channel1]_Effect1]", "enabled", 1);
+    }
 
-  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel1]]", "chain_selector") );
-  HIDDebug("chain_selector=" + engine.getValue("[QuickEffectRack1_[Channel2]]", "chain_selector") );
+  }
+  else if (buttonNumber === 3 || buttonNumber === 4) {
+    script.toggleControl("[EffectRack1_EffectUnit" + (buttonNumber-2) + "]", "group_[Channel2]_enable");
 
-  // }
+    TraktorS2MK3.controller.setOutput("[Master]", "FX3", engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel2]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+    TraktorS2MK3.controller.setOutput("[Master]", "FX4", engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel2]_enable") ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
+
+    if (engine.getValue("[EffectRack1_EffectUnit1]", "group_[Channel2]_enable") || engine.getValue("[EffectRack1_EffectUnit2]", "group_[Channel2]_enable")) {
+      // disable quickeffect
+      engine.setValue("[QuickEffectRack1_[Channel2]_Effect1]", "enabled", 0);
+    }
+    else {
+      // enable quickeffect
+      engine.setValue("[QuickEffectRack1_[Channel2]_Effect1]", "enabled", 1);
+    }
+
+  }
 
 }
 
@@ -968,12 +1018,16 @@ TraktorS2MK3.directoryButtonHandler = function(field) {
     return;
   }
   if (TraktorS2MK3.DirectoryButtonMode === "NORMAL") {
-    HIDDebug("TraktorS2MK3.DirectoryButtonMode === NORMAL");
+    // HIDDebug("TraktorS2MK3.DirectoryButtonMode === NORMAL");
 
     if (engine.getValue("[Master]", "maximize_library") === 0) {
       engine.setValue("[Master]", "maximize_library", 1);
+      TraktorS2MK3.outputCallback(1, "[Channel1]", "directorybutton");
+      TraktorS2MK3.outputCallback(1, "[Channel2]", "directorybutton");
     } else {
       engine.setValue("[Master]", "maximize_library", 0);
+      TraktorS2MK3.outputCallback(0, "[Channel1]", "directorybutton");
+      TraktorS2MK3.outputCallback(0, "[Channel2]", "directorybutton");
     }
 
   }
@@ -987,7 +1041,7 @@ TraktorS2MK3.quantizeHandler = function(field) {
   TraktorS2MK3.master_quantize = !TraktorS2MK3.master_quantize;
   engine.setValue("[Channel1]", "quantize", TraktorS2MK3.master_quantize);
   engine.setValue("[Channel2]", "quantize", TraktorS2MK3.master_quantize);
-  TraktorS2MK3.controller.setOutput("[Master]", "!quantize", 0x7F * TraktorS2MK3.master_quantize, true);
+  TraktorS2MK3.controller.setOutput("[Master]", "!quantize", (TraktorS2MK3.master_quantize) ? TraktorS2MK3.controller.ledcolor.high : TraktorS2MK3.controller.ledcolor.low, true);
 }
 
 TraktorS2MK3.callbackLoopMove = function(field) {
@@ -1029,7 +1083,7 @@ TraktorS2MK3.callbackLoopMove = function(field) {
 
 TraktorS2MK3.callbackLoopSize = function(field) {
   var splitted = field.id.split(".");
-  var group = splitted[0]
+  var group = splitted[0];
   prev_loopsize = TraktorS2MK3.controller.prev_loopsize[group];
   TraktorS2MK3.controller.prev_loopsize[group] = field.value;
   var delta = 0;
@@ -1084,10 +1138,7 @@ TraktorS2MK3.callbackBrowseL = function(field) {
   } else {
     return;
   }
-  if (
-    TraktorS2MK3.controller.shift_pressed["[Channel1]"] ||
-    TraktorS2MK3.controller.shift_pressed["[Channel2]"]
-  ) {
+  if (TraktorS2MK3.controller.shift_pressed["[Channel1]"] || TraktorS2MK3.controller.shift_pressed["[Channel2]"]) {
     engine.setValue("[Playlist]", "SelectPlaylist", delta);
   }
   else {
@@ -1117,10 +1168,8 @@ TraktorS2MK3.callbackBrowseR = function(field) {
   } else {
     return;
   }
-  if (
-    TraktorS2MK3.controller.shift_pressed["[Channel1]"] ||
-    TraktorS2MK3.controller.shift_pressed["[Channel2]"]
-  ) {
+
+  if (TraktorS2MK3.controller.shift_pressed["[Channel1]"] || TraktorS2MK3.controller.shift_pressed["[Channel2]"]) {
     engine.setValue("[Playlist]", "SelectPlaylist", delta);
   }
   else {
@@ -1148,41 +1197,41 @@ TraktorS2MK3.scalerSlider = function(group, name, value) {
 }
 
 TraktorS2MK3.outputChannelCallback = function(value,group,key) {
-  var led_value = TraktorS2MK3.ledcolor.low;
+  var led_value = TraktorS2MK3.controller.ledcolor.low;
   if (value) {
-    led_value = TraktorS2MK3.ledcolor.high;
+    led_value = TraktorS2MK3.controller.ledcolor.high;
   }
   TraktorS2MK3.controller.setOutput(group, key, led_value, !TraktorS2MK3.controller.freeze_lights);
 }
 
 TraktorS2MK3.outputChannelCallbackDark = function(value,group,key) {
-  var led_value = TraktorS2MK3.ledcolor.off;
+  var led_value = TraktorS2MK3.controller.ledcolor.off;
   if (value) {
-    led_value = TraktorS2MK3.ledcolor.high;
+    led_value = TraktorS2MK3.controller.ledcolor.high;
   }
   TraktorS2MK3.controller.setOutput(group, key, led_value, !TraktorS2MK3.controller.freeze_lights);
 }
 
 TraktorS2MK3.outputCallback = function(value,group,key) {
-  var led_value = TraktorS2MK3.ledcolor.low;
+  var led_value = TraktorS2MK3.controller.ledcolor.low;
   if (value) {
-    led_value = TraktorS2MK3.ledcolor.high;
+    led_value = TraktorS2MK3.controller.ledcolor.high;
   }
   TraktorS2MK3.controller.setOutput(group, key, led_value, !TraktorS2MK3.controller.freeze_lights);
 }
 
 TraktorS2MK3.outputCallbackLoop = function(value,group,key) {
-  var led_value = TraktorS2MK3.ledcolor.low;
+  var led_value = TraktorS2MK3.controller.ledcolor.low;
   if (engine.getValue(group, "loop_enabled")) {
-    led_value = TraktorS2MK3.ledcolor.high;
+    led_value = TraktorS2MK3.controller.ledcolor.high;
   }
   TraktorS2MK3.controller.setOutput(group, key, led_value, !TraktorS2MK3.controller.freeze_lights);
 }
 
 TraktorS2MK3.outputCallbackDark = function(value,group,key) {
-  var led_value = TraktorS2MK3.ledcolor.off;
+  var led_value = TraktorS2MK3.controller.ledcolor.off;
   if (value) {
-    led_value = TraktorS2MK3.ledcolor.high;
+    led_value = TraktorS2MK3.controller.ledcolor.high;
   }
   TraktorS2MK3.controller.setOutput(group, key, led_value, !TraktorS2MK3.controller.freeze_lights);
 }
@@ -1201,7 +1250,7 @@ TraktorS2MK3.outputCueCallback = function(value, group, key) {
   //   else if (num == '3') RGB_value = [0, 0x20, 0x20];
   //   else if (num == '4') RGB_value = [0, 0x20, 0];
   } else {
-    RGB_value = [TraktorS2MK3.ledcolor.off];
+    RGB_value = [TraktorS2MK3.controller.ledcolor.off];
   }
 
   TraktorS2MK3.controller.setOutput(group, key, RGB_value[0], false);
