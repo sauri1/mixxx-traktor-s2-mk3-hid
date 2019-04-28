@@ -5,12 +5,12 @@ Based on Traktor s2 mk2 configuration in Mixxx forum: https://www.mixxx.org/foru
 
 # non-obvious controller commands
 
-- shift + <grid>: set gridpoint to current play location
-- shift + <cue>: go to beginning of track
-- <FX1> / <FX2>: toggle Deck 1 FX1 / FX2 on/off, when FX1/FX2 is on, deck 1 quick filter effect is off
-- <FX3> / <FX4>: toggle Deck 2 FX1 / FX2 on/off, when FX1/FX2 is on, deck 2 quick filter effect is off
-- left shift + <FX1/FX2/FX3>: toggle FX1 effects 1/2/3 on/off
-- right shift + <FX1/FX2/FX3>: toggle FX2 effects 1/2/3 on/off
+- shift + [grid]: set gridpoint to current play location
+- shift + [cue]: go to beginning of track
+- [FX1> / [FX2]: toggle Deck 1 FX1 / FX2 on/off, when FX1/FX2 is on, deck 1 quick filter effect is off
+- [FX3> / [FX4]: toggle Deck 2 FX1 / FX2 on/off, when FX1/FX2 is on, deck 2 quick filter effect is off
+- left shift + [FX1/FX2/FX3]: toggle FX1 effects 1/2/3 on/off
+- right shift + [FX1/FX2/FX3]: toggle FX2 effects 1/2/3 on/off
 
 
 # user settings in beginning of file
