@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <MixxxControllerPreset mixxxVersion="2.0.0" schemaVersion="1">
     <info>
-        <name>Traktor Kontrol S2 MK2</name>
+        <name>Traktor Kontrol S2 MK3</name>
         <author>Antti Puranen</author>
         <description>HID Mapping for Traktor Kontrol S2 MK3</description>
     </info>
